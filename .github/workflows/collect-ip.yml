@@ -2,41 +2,44 @@ name: Update IP List
 
 on:
   schedule:
-    - cron: '0 */6 * * *' # 每3小时运行一次
-  workflow_dispatch: # 允许手动触发
-
+    - cron: '0 */6 * * *' # هر 6 ساعت یکبار اجرا می‌شود (قبلا ۳ ساعت بود)
+  workflow_dispatch: # اجازه می‌دهد که به صورت دستی هم اجرا شود
 
 jobs:
-
   update-ip-list:
     runs-on: ubuntu-latest
     
+    # این بخش برای دادن دسترسی نوشتن به اکشن اضافه شده است
+    permissions:
+      contents: write
+
     steps:
-    - uses: actions/checkout@v3
-    
-    - name: Delete workflow runs
+    - name: Checkout repository
+      uses: actions/checkout@v3
+
+    - name: Delete old workflow runs
       uses: Mattraks/delete-workflow-runs@v2
       with:
         token: ${{ github.token }}
         repository: ${{ github.repository }}
         retain_days: 2
         keep_minimum_runs: 6
-        
+
     - name: Set up Python
       uses: actions/setup-python@v4
       with:
         python-version: '3.9'
-        
+
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
         pip install requests
         pip install beautifulsoup4
-        
+
     - name: Run collect_ips script
       run: |
         python ${{ github.workspace }}/collect_ips.py
-        
+
     - name: Run ipcha script
       run: |
         python ${{ github.workspace }}/ipcha.py 
@@ -47,13 +50,14 @@ jobs:
 
     - name: Commit and push changes
       run: |
-        git config --global user.email "chenhua.xu@qq.com"
-        git config --global user.name "wokaotianshi123"
-        # 检查是否有文件更改，包括 ipfj 文件夹及其内容
+        # استفاده از کاربر پیش‌فرض گیت‌هاب برای کامیت‌های خودکار
+        git config --global user.name 'github-actions[bot]'
+        git config --global user.email 'github-actions[bot]@users.noreply.github.com'
+        
+        # بررسی وجود تغییرات در فایل‌ها
         if [ -n "$(git status --porcelain)" ]; then
-          # 添加所有更改的文件，包括 ipfj 文件夹
           git add .
-          git commit -m "Automatic update"
+          git commit -m "Automatic IP list update"
           git push
         else
           echo "No changes detected, skipping commit."
