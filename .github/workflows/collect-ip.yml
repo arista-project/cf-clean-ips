@@ -2,7 +2,7 @@ name: Update IP List
 
 on:
   schedule:
-    - cron: '0 */6 * * *' # هر 6 ساعت یکبار اجرا می‌شود (قبلا ۳ ساعت بود)
+    - cron: '0 */3 * * *' # هر 6 ساعت یکبار اجرا می‌شود (قبلا ۳ ساعت بود)
   workflow_dispatch: # اجازه می‌دهد که به صورت دستی هم اجرا شود
 
 jobs:
@@ -28,7 +28,7 @@ jobs:
     - name: Set up Python
       uses: actions/setup-python@v4
       with:
-        python-version: '3.9'
+        python-version: '3.12'
 
     - name: Install dependencies
       run: |
